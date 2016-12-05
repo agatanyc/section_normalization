@@ -11,26 +11,24 @@ sqlite3
 
 sqlalchemy_utils
 
-## to initialize db and create tables run:
 
-`python model.py`
+## SECTION and ROW PARSING:
 
-
-In addition to seeing whether you solved the problem (and how accurately you normalized the listings), we're very interested to see *how* you attempted to solve it, and what kind of decomposition and code organization you used to implement the solution. On the first point, please submit a short (maybe 2 paragraph) README detailing your approach. Note that there are many different possibilities, and there are no bonus points for *complexity for its own sake*.
-
-## SECTION PARSING:
-* section_id is unique within a stadium
-* section_id's start at 1
-We are filtering non-digits from text, saving  only the integer as section_name value do that both `Empire Suite 241` or `241` are considered valid input.
+If there are digits in the text we filter non-digits from text, saving only the digits as section_name value. I noticed cases of abbreviations i.e. entry in the dodgerstadium manifest `160,Left Field Pavilion 311,6,G` corresponds with valid entry `311PL,G,160,6,True`. Another reason for is approach is that both `Empire Suite 241` or `241` may be a considered valid input.
+If we are saving any letters it all will be uppercase. 
 
 
-## ROW PARSING:
-* row_id is unique within a section
-* row_id's are actually ordinal and start at 0, meaning row_id 0 is "closer to the front" than row_id 1
-* some sections may have numerical row names (1-10) and some may have alphanumeric row names (A-Z, AA-DD). Your code should support both
+In Dodgers Stadium data normalization I run into issues where the database query results in multiple outputs that differ only be section_id.  Below find an output of my database query:
 
-Some rows are represented as numbers and some as upper_case letters (A-Z, AA-DD).
-We assume Row A is an equivalent to row 1, Row Z to 26. If we see double letters we are passed Z therefore Row AA is equivalent to  27, BB to 28 and so forth..
+```
+sqlite> select * from manifest where section_name='7' and row_name='N';
+1342|107|7|12|N
+2498|168|7|12|N
+3062|201|7|12|N
+```
+
+I was not able to find a solution to this problem but in my test (see output of `_check_data` function) I confirmed that this is the only cause of my script not finding the exact match. Note that the case where row_name is passed as a range is handled. Range valued is never saved in the manifest therefore there will never be a match.
+
 
 
 
